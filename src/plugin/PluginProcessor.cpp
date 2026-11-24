@@ -33,6 +33,22 @@ VokalAssistentProcessor::VokalAssistentProcessor()
                           .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
       apvts (*this, nullptr, "VokalAssistent", params::createLayout())
 {
+    for (int b = 0; b < kNumBands; ++b)
+    {
+        auto& bp = bandParams[(size_t) b];
+        bp.on = apvts.getRawParameterValue (params::on (b));
+        bp.freq = apvts.getRawParameterValue (params::freq (b));
+        bp.gain = params::hasGain (b) ? apvts.getRawParameterValue (params::gain (b)) : nullptr;
+        bp.q = params::hasQ (b) ? apvts.getRawParameterValue (params::q (b)) : nullptr;
+    }
+    hpfSlopeParam = apvts.getRawParameterValue (params::hpfSlope);
+    dsOnParam = apvts.getRawParameterValue (params::dsOn);
+    dsFreqParam = apvts.getRawParameterValue (params::dsFreq);
+    dsThreshParam = apvts.getRawParameterValue (params::dsThresh);
+    dsRangeParam = apvts.getRawParameterValue (params::dsRange);
+    dsModeParam = apvts.getRawParameterValue (params::dsMode);
+    dsListenParam = apvts.getRawParameterValue (params::dsListen);
+    outGainParam = apvts.getRawParameterValue (params::outGain);
 }
 
 VokalAssistentProcessor::~VokalAssistentProcessor()
@@ -62,7 +78,7 @@ void VokalAssistentProcessor::prepareToPlay (double sampleRate, int)
     deEsser.prepare (sampleRate, chans);
     firstBlock = true;
     outGainSmoothed.reset (sampleRate, 0.05);
-    outGainSmoothed.setCurrentAndTargetValue (juce::Decibels::decibelsToGain ((double) apvts.getRawParameterValue (params::outGain)->load()));
+    outGainSmoothed.setCurrentAndTargetValue (juce::Decibels::decibelsToGain ((double) outGainParam->load()));
 }
 
 EqSettings VokalAssistentProcessor::readEqSettings() const
@@ -71,24 +87,25 @@ EqSettings VokalAssistentProcessor::readEqSettings() const
     for (int b = 0; b < kNumBands; ++b)
     {
         auto& band = s.bands[(size_t) b];
-        band.enabled = apvts.getRawParameterValue (params::on (b))->load() > 0.5f;
-        band.freq = apvts.getRawParameterValue (params::freq (b))->load();
-        band.gainDb = params::hasGain (b) ? (double) apvts.getRawParameterValue (params::gain (b))->load() : 0.0;
-        band.q = params::hasQ (b) ? (double) apvts.getRawParameterValue (params::q (b))->load() : 0.707;
+        const auto& bp = bandParams[(size_t) b];
+        band.enabled = bp.on->load() > 0.5f;
+        band.freq = bp.freq->load();
+        band.gainDb = bp.gain != nullptr ? (double) bp.gain->load() : 0.0;
+        band.q = bp.q != nullptr ? (double) bp.q->load() : 0.707;
     }
-    s.hpfSteep = apvts.getRawParameterValue (params::hpfSlope)->load() > 0.5f;
+    s.hpfSteep = hpfSlopeParam->load() > 0.5f;
     return s;
 }
 
 DeEssSettings VokalAssistentProcessor::readDeEssSettings() const
 {
     DeEssSettings d;
-    d.enabled = apvts.getRawParameterValue (params::dsOn)->load() > 0.5f;
-    d.freq = apvts.getRawParameterValue (params::dsFreq)->load();
-    d.thresholdDb = apvts.getRawParameterValue (params::dsThresh)->load();
-    d.rangeDb = apvts.getRawParameterValue (params::dsRange)->load();
-    d.focused = apvts.getRawParameterValue (params::dsMode)->load() > 0.5f;
-    d.listen = apvts.getRawParameterValue (params::dsListen)->load() > 0.5f;
+    d.enabled = dsOnParam->load() > 0.5f;
+    d.freq = dsFreqParam->load();
+    d.thresholdDb = dsThreshParam->load();
+    d.rangeDb = dsRangeParam->load();
+    d.focused = dsModeParam->load() > 0.5f;
+    d.listen = dsListenParam->load() > 0.5f;
     return d;
 }
 
@@ -194,7 +211,7 @@ void VokalAssistentProcessor::process (juce::AudioBuffer<Sample>& buffer)
     deEssReduction.store ((float) deEsser.getCurrentReductionDb());
 
     // ---- output gain
-    outGainSmoothed.setTargetValue (juce::Decibels::decibelsToGain ((double) apvts.getRawParameterValue (params::outGain)->load()));
+    outGainSmoothed.setTargetValue (juce::Decibels::decibelsToGain ((double) outGainParam->load()));
     for (int i = 0; i < n; ++i)
     {
         const double g = outGainSmoothed.getNextValue();

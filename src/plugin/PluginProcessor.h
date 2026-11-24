@@ -71,6 +71,14 @@ private:
     void smoothTowards (const va::EqSettings& target, double alpha);
     void handleAsyncUpdate() override;
 
+    // Cached parameter pointers (no string lookups or allocations on the audio thread).
+    struct BandParams { std::atomic<float>* on = nullptr; std::atomic<float>* freq = nullptr; std::atomic<float>* gain = nullptr; std::atomic<float>* q = nullptr; };
+    std::array<BandParams, va::kNumBands> bandParams;
+    std::atomic<float>* hpfSlopeParam = nullptr;
+    std::atomic<float>* dsOnParam = nullptr; std::atomic<float>* dsFreqParam = nullptr; std::atomic<float>* dsThreshParam = nullptr;
+    std::atomic<float>* dsRangeParam = nullptr; std::atomic<float>* dsModeParam = nullptr; std::atomic<float>* dsListenParam = nullptr;
+    std::atomic<float>* outGainParam = nullptr;
+
     double currentSampleRate = 48000.0;
     std::vector<va::VocalEqChannel> eqChannels;
     va::DeEsser deEsser;
