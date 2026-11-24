@@ -66,6 +66,8 @@ public:
     {
         const auto bounds = juce::Rectangle<int> (x, y, w, h).toFloat().reduced (3.0f);
         const float radius = juce::jmin (bounds.getWidth(), bounds.getHeight()) * 0.5f;
+        if (radius < 6.0f)
+            return;
         const auto centre = bounds.getCentre();
         const float angle = startAngle + pos * (endAngle - startAngle);
         const auto fill = s.findColour (juce::Slider::rotarySliderFillColourId);

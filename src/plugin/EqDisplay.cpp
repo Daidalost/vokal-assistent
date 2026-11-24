@@ -159,6 +159,8 @@ void EqDisplay::paint (juce::Graphics& g)
     using namespace theme;
     const auto area = plotArea();
     g.fillAll (bg());
+    if (area.getWidth() < 20.0f || area.getHeight() < 20.0f)
+        return;
     g.setColour (panel());
     g.fillRoundedRectangle (getLocalBounds().toFloat().reduced (1.0f), 6.0f);
 
@@ -268,7 +270,8 @@ void EqDisplay::paint (juce::Graphics& g)
         juce::Path p;
         for (float x = area.getX(); x <= area.getRight(); x += 1.5f)
         {
-            const double db = eqResponseDb (eq, freqForX (x), fs);
+            double db = eqResponseDb (eq, freqForX (x), fs);
+            if (! std::isfinite (db)) db = 0.0;
             const float y = yForDb (juce::jlimit (-dbRange * 1.2, dbRange * 1.2, db));
             if (x == area.getX()) p.startNewSubPath (x, y);
             else p.lineTo (x, y);
