@@ -1,0 +1,21 @@
+VOKAL ASSISTENT - installation (Windows, Cubase)
+================================================
+
+1. Close Cubase.
+2. Copy the folder "Vokal Assistent.vst3" to:
+       C:\Program Files\Common Files\VST3
+   (Windows asks for administrator permission - accept.)
+3. Start Cubase. If the plugin does not show up:
+   Studio > VST Plug-in Manager > "Update Plug-in Information".
+   You find it under Effects > EQ > "Vokal Assistent" (manufacturer Daidalost).
+
+Quick start
+-----------
+1. Insert Vokal Assistent on the vocal track (insert slot, before compressors).
+2. Press "Analyze" and play the song for 30-60 seconds.
+3. Press "Stop and analyze". Read the report on the right.
+4. Choose the voice profile (Auto/Male/Female) and the amount, then press
+   "Apply suggestion". Everything stays editable and undoable (Ctrl+Z).
+
+The plugin is not code signed. Cubase loads it without problems; Windows may
+only ask for permission when you copy it to the VST3 folder.
