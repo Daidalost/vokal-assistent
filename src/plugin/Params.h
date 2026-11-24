@@ -46,7 +46,9 @@ inline juce::NormalisableRange<float> freqRange (float lo, float hi)
 
 inline juce::String hzToText (float v, int)
 {
-    return v >= 1000.0f ? juce::String (v / 1000.0f, v >= 10000.0f ? 1 : 2) + " kHz" : juce::String (juce::roundToInt (v)) + " Hz";
+    if (v < 999.5f) return juce::String (juce::roundToInt (v)) + " Hz";
+    const bool tenK = v >= 9995.0f;
+    return juce::String (v / 1000.0f, tenK ? 1 : 2) + "k";
 }
 inline float textToHz (const juce::String& t)
 {
@@ -94,7 +96,9 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createLayout()
     layout.add (std::make_unique<AudioParameterFloat> (ParameterID { dsThresh, version }, "De-esser Threshold",
                                                        NormalisableRange<float> (-60.0f, 0.0f, 0.1f), -30.0f, dbAttr));
     layout.add (std::make_unique<AudioParameterFloat> (ParameterID { dsRange, version }, "De-esser Range",
-                                                       NormalisableRange<float> (0.0f, 20.0f, 0.1f), 8.0f, dbAttr));
+                                                       NormalisableRange<float> (0.0f, 20.0f, 0.1f), 8.0f,
+                                                       AudioParameterFloatAttributes().withStringFromValueFunction (
+                                                           [] (float v, int) { return String (v, 1) + " dB"; })));
     layout.add (std::make_unique<AudioParameterChoice> (ParameterID { dsMode, version }, "De-esser Mode", StringArray { "Wide", "Focused" }, 0));
     layout.add (std::make_unique<AudioParameterBool> (ParameterID { dsListen, version }, "De-esser Listen", false));
 

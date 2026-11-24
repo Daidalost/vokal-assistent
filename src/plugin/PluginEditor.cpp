@@ -22,6 +22,7 @@ void Knob::resized()
 {
     auto r = getLocalBounds();
     label.setBounds (r.removeFromTop (14));
+    slider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, juce::jmax (40, r.getWidth() - 4), 16);
     slider.setBounds (r);
 }
 
@@ -111,11 +112,11 @@ VokalAssistentEditor::VokalAssistentEditor (VokalAssistentProcessor& p)
     profileAtt = std::make_unique<ComboAttachment> (p.apvts, params::profile, profileBox);
     showAnalysis.setToggleState (true, juce::dontSendNotification);
     showAnalysis.onClick = [this] { display.setShowAnalysis (showAnalysis.getToggleState()); };
-    report.setMultiLine (true, false);
+    report.setMultiLine (true, true);
     report.setReadOnly (true);
     report.setScrollbarsShown (true);
     report.setCaretVisible (false);
-    report.setFont (juce::FontOptions (juce::Font::getDefaultMonospacedFontName(), 11.5f, juce::Font::plain));
+    report.setFont (juce::FontOptions (juce::Font::getDefaultMonospacedFontName(), 11.0f, juce::Font::plain));
     for (auto* c : std::initializer_list<juce::Component*> { &analyzeButton, &applyButton, &statusLabel, &profileLabel, &profileBox,
                                                              &amount, &showAnalysis, &report })
         addAndMakeVisible (c);
@@ -164,7 +165,7 @@ void VokalAssistentEditor::resized()
 {
     auto r = getLocalBounds().reduced (10);
     r.removeFromTop (32);
-    assistantArea = r.removeFromRight (320);
+    assistantArea = r.removeFromRight (340);
     r.removeFromRight (10);
 
     deessArea = r.removeFromBottom (118);

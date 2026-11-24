@@ -47,6 +47,20 @@ public:
         setColour (juce::ToggleButton::tickColourId, accent());
     }
 
+    juce::Label* createSliderTextBox (juce::Slider& s) override
+    {
+        auto* l = LookAndFeel_V4::createSliderTextBox (s);
+        l->setFont (juce::FontOptions (12.5f));
+        return l;
+    }
+
+    juce::Font getLabelFont (juce::Label& l) override
+    {
+        if (dynamic_cast<juce::Slider*> (l.getParentComponent()) != nullptr)
+            return juce::FontOptions (12.5f);
+        return LookAndFeel_V4::getLabelFont (l);
+    }
+
     void drawRotarySlider (juce::Graphics& g, int x, int y, int w, int h, float pos, float startAngle, float endAngle,
                            juce::Slider& s) override
     {

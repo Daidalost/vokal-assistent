@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 option(VA_BUILD_PLUGIN "Build the VST3 plugin (needs JUCE)" ON)
+option(VA_BUILD_DEV_TOOLS "Build developer tools (UI snapshot)" OFF)
 
 # ---------------------------------------------------------------- core (no JUCE)
 add_library(va_core STATIC src/core/Analyzer.cpp)
@@ -64,4 +65,11 @@ if(VA_BUILD_PLUGIN)
   target_link_libraries(VokalAssistent
     PRIVATE va_core juce::juce_audio_utils juce::juce_dsp
     PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_lto_flags juce::juce_recommended_warning_flags)
+
+  if(VA_BUILD_DEV_TOOLS)
+    juce_add_console_app(va_ui_snapshot PRODUCT_NAME "va_ui_snapshot")
+    target_sources(va_ui_snapshot PRIVATE tools/ui_snapshot.cpp)
+    target_compile_definitions(va_ui_snapshot PRIVATE JUCE_MODAL_LOOPS_PERMITTED=1 JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
+    target_link_libraries(va_ui_snapshot PRIVATE VokalAssistent va_core juce::juce_audio_utils juce::juce_dsp juce::juce_recommended_config_flags)
+  endif()
 endif()
